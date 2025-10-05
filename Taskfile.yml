@@ -1,0 +1,17 @@
+version: '3'
+
+tasks:
+  list:
+    desc: List the running gocket server
+    cmds:
+      - ps aux | grep gocket
+  stop:
+    desc: Stop the running gocket server
+    cmds:
+      - pkill -TERM gocket || true
+  start:
+    desc: Start the gocket server
+    cmds:
+      - go run cmd/gocket/main.go
+
+
