@@ -256,8 +256,8 @@
         }
 
         function viewArticle(id) {
-            // For now, just show an alert. In a real app, you'd open a reading view
-            alert('Article reading view coming soon! Article ID: ' + id);
+            // Open the article reading view
+            window.open(`/article?id=${id}`, '_blank');
         }
 
         function showMessage(text, type) {

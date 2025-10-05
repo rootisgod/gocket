@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading: <span id="article-title">Article Title</span> - Gocket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .article-meta {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .article-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            line-height: 1.3;
+        }
+
+        .article-author {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .article-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        .article-content h1,
+        .article-content h2,
+        .article-content h3 {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .article-content h1 {
+            font-size: 24px;
+        }
+
+        .article-content h2 {
+            font-size: 22px;
+        }
+
+        .article-content h3 {
+            font-size: 20px;
+        }
+
+        .article-content p {
+            margin-bottom: 20px;
+        }
+
+        .article-content ul,
+        .article-content ol {
+            margin-bottom: 20px;
+            padding-left: 30px;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+        }
+
+        .article-content blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #555;
+        }
+
+        .article-content a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .article-content a:hover {
+            text-decoration: underline;
+        }
+
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .read-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .read-status.read {
+            background: #27ae60;
+            color: white;
+        }
+
+        .read-status.unread {
+            background: #f39c12;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .article-content {
+                padding: 20px;
+                font-size: 16px;
+            }
+            
+            .article-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="nav-buttons">
+                <a href="/" class="btn btn-secondary">← Back to Articles</a>
+                <button onclick="toggleReadStatus()" class="btn" id="readBtn">Mark as Read</button>
+                <button onclick="deleteArticle()" class="btn btn-danger">Delete Article</button>
+            </div>
+            
+            <div id="article-meta" class="article-meta">
+                <div class="loading">Loading article...</div>
+            </div>
+            
+            <h1 id="article-title" class="article-title">Loading...</h1>
+            <div id="article-author" class="article-author"></div>
+        </div>
+
+        <div id="article-content" class="article-content">
+            <div class="loading">Loading content...</div>
+        </div>
+    </div>
+
+    <script>
+        let currentArticle = null;
+
+        // Load article on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const articleId = getArticleIdFromUrl();
+            if (articleId) {
+                loadArticle(articleId);
+            } else {
+                showError('No article ID provided');
+            }
+        });
+
+        function getArticleIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        async function loadArticle(id) {
+            try {
+                const response = await fetch(`/api/articles/${id}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load article');
+                }
+                
+                currentArticle = await response.json();
+                displayArticle(currentArticle);
+            } catch (error) {
+                showError('Failed to load article: ' + error.message);
+            }
+        }
+
+        function displayArticle(article) {
+            // Update page title
+            document.title = `Reading: ${escapeHtml(article.title)} - Gocket`;
+            
+            // Update article title
+            document.getElementById('article-title').textContent = article.title;
+            
+            // Update article meta
+            const metaDiv = document.getElementById('article-meta');
+            metaDiv.innerHTML = `
+                <div>
+                    <span class="read-status ${article.read_status ? 'read' : 'unread'}">
+                        ${article.read_status ? 'Read' : 'Unread'}
+                    </span>
+                    <span style="margin-left: 10px;">
+                        ${article.domain} • ${article.reading_time} min read • 
+                        Saved on ${new Date(article.saved_date).toLocaleDateString()}
+                        ${article.published_date ? ` • Published ${new Date(article.published_date).toLocaleDateString()}` : ''}
+                    </span>
+                </div>
+            `;
+            
+            // Update author
+            const authorDiv = document.getElementById('article-author');
+            if (article.author) {
+                authorDiv.textContent = `By ${escapeHtml(article.author)}`;
+            } else {
+                authorDiv.textContent = '';
+            }
+            
+            // Update content
+            document.getElementById('article-content').innerHTML = formatContent(article.content);
+            
+            // Update read button
+            const readBtn = document.getElementById('readBtn');
+            readBtn.textContent = article.read_status ? 'Mark as Unread' : 'Mark as Read';
+        }
+
+        function formatContent(content) {
+            // Basic content formatting
+            let formatted = escapeHtml(content);
+            
+            // Convert line breaks to paragraphs
+            formatted = formatted.replace(/\n\n+/g, '</p><p>');
+            formatted = '<p>' + formatted + '</p>';
+            
+            // Convert URLs to links
+            formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+            
+            return formatted;
+        }
+
+        async function toggleReadStatus() {
+            if (!currentArticle) return;
+            
+            try {
+                const updatedArticle = { ...currentArticle };
+                updatedArticle.read_status = !updatedArticle.read_status;
+                
+                const response = await fetch(`/api/articles/${currentArticle.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedArticle)
+                });
+                
+                if (response.ok) {
+                    currentArticle.read_status = !currentArticle.read_status;
+                    displayArticle(currentArticle);
+                } else {
+                    alert('Failed to update read status');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function deleteArticle() {
+            if (!currentArticle) return;
+            
+            if (!confirm('Are you sure you want to delete this article?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/articles/${currentArticle.id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Article deleted successfully!');
+                    window.location.href = '/';
+                } else {
+                    alert('Failed to delete article');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('article-meta').innerHTML = `<div class="error">${message}</div>`;
+            document.getElementById('article-title').textContent = 'Error';
+            document.getElementById('article-content').innerHTML = '';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

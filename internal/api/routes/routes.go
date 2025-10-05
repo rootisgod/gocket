@@ -42,8 +42,24 @@ func SetupRoutes(articleHandler *handlers.ArticleHandler) http.Handler {
 		w.Write([]byte(`{"status":"healthy"}`))
 	})
 
-	// Serve static files (for web interface)
-	mux.Handle("/", http.FileServer(http.Dir("./web/static/")))
+	// Serve article reading page
+	mux.HandleFunc("/article", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		http.ServeFile(w, r, "./web/static/article.html")
+	})
+
+	// Serve static files (for web interface) - exclude /article path
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static/"))))
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			http.ServeFile(w, r, "./web/static/index.html")
+		} else {
+			http.NotFound(w, r)
+		}
+	})
 
 	// Add middleware
 	return middleware.CORS(middleware.Logging(mux))
