@@ -14,3 +14,7 @@ This project will
 - modernc.org/sqlite: Pure Go SQLite driver used by `database/sql` (no CGO needed). Enables embedding SQLite in the app for local storage.
 - (indirect) modernc.org/libc, memory, mathutil, etc.: Internal building blocks required by the modernc toolchain and SQLite driver.
 - (indirect) golang.org/x/sys, x/exp and others: Transitive utilities pulled in by the driver; you don't import these directly.
+
+## Help
+
+https://go-cookbook.com/snippets
